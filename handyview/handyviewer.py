@@ -11,7 +11,7 @@ from handyview.canvas_crop import CanvasCrop
 from handyview.canvas_video import CanvasVideo
 from handyview.db import HVDB
 from handyview.utils import ROOT_DIR
-from handyview.widgets import HLine, MessageDialog, show_msg
+from handyview.widgets import HLine, MessageDialog, show_msg, CompareSettingEdit
 
 
 class Application(QApplication):
@@ -355,6 +355,8 @@ class MainWindow(QMainWindow):
         if self.canvas_type != 'main':
             self.switch_main_canvas()
 
+        ### the second reture value of getOpenFileName is ``file_type``, not status
+        ### https://blog.csdn.net/humanking7/article/details/80546728
         key, ok = QFileDialog.getOpenFileName(self, 'Select an image', os.path.join(self.hvdb.get_folder(), '../'))
         if ok:
             self.center_canvas.canvas.add_cmp_folder(key)
@@ -370,6 +372,14 @@ class MainWindow(QMainWindow):
         # clear the text description in the dock window
         self.center_canvas.canvas.update_path_list()
 
+    def compare_setting(self):
+        compare_setting_box = CompareSettingEdit(self.hvdb.compare_config)
+        compare_setting_box.save_button.clicked.connect(
+            lambda: self.hvdb.update_compare_config(compare_setting_box.exportConfig())
+            )
+        compare_setting_box.save_button.clicked.connect(compare_setting_box.accept)
+        compare_setting_box.exec_()
+
     # ---------------------------------------
     # slots: canvas layouts
     # ---------------------------------------
@@ -384,7 +394,7 @@ class MainWindow(QMainWindow):
             self.canvas_type = 'main'
 
     def switch_compare_canvas(self):
-        if self.canvas_type != 'compare':
+        if self.canvas_type != 'compare' or True:
             num_compare = self.hvdb.get_folder_len()
             if num_compare == 1:
                 num_view, ok = QInputDialog.getText(self, 'Compare Canvas', '# Compare Columns: (options: 2, 3, 4)',

@@ -1,7 +1,9 @@
+from distutils.command.config import config
 import hashlib
 import imagehash
 import os
 from PIL import Image, ImageFile
+import json
 
 from handyview.utils import FORMATS, ROOT_DIR, get_img_list, scandir, sizeof_fmt
 from handyview.widgets import show_msg
@@ -44,6 +46,8 @@ class HVDB():
         self.recursive_scan_folder = False
 
         self.get_init_path_list()
+
+        self.init_compare_config()
 
     def get_init_path_list(self):
         """get path list when first launch (double click or from cmd)"""
@@ -132,6 +136,13 @@ class HVDB():
             if len(img_list) != img_len_list[0]:
                 self.is_same_len = False
         return self.is_same_len, img_len_list
+
+    def update_com_folder(self, config):
+        self.folder_list = [config[k] for k in config.keys() if k.startswith("view")]
+        self.path_list = [get_img_list(folder, self._include_names, self._exclude_names, self._exact_exclude_names) for folder in self.folder_list]
+        self.file_size_list = [[None] * len(paths) for paths in self.path_list]
+        self.md5_list = [[None] * len(paths) for paths in self.path_list]
+        self.phash_list = [[None] * len(paths) for paths in self.path_list]
 
     def update_path_list(self):
         if self.recursive_scan_folder is False:
@@ -283,3 +294,21 @@ class HVDB():
     @interval.setter
     def interval(self, value):
         self._interval = value
+
+    def init_compare_config(self):
+        try:
+            with open(os.path.join(ROOT_DIR, 'history.json'), 'r') as jf:
+                config = json.load(jf)
+        except Exception:
+            config = {"num_view": self.get_folder_len()}
+            for idx, folder in enumerate(self.folder_list):
+                config["view%d_folder" % idx] = folder
+            config["zoom_factor"] = 1.0
+        setattr(self, "compare_config", config)
+
+    def update_compare_config(self, config):
+        self.compare_config = config
+        print(config)
+        self.update_com_folder(config)
+        with open(os.path.join(ROOT_DIR, 'history.json'), 'w') as jf:
+            json.dump(config, jf)

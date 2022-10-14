@@ -4,8 +4,9 @@ Include customized widgets used in HandyView.
 
 import os
 from PyQt5 import QtCore
-from PyQt5.QtGui import QColor, QFont, QIcon, QPixmap
-from PyQt5.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QMessageBox, QPushButton, QVBoxLayout
+from PyQt5.QtGui import QColor, QFont, QIcon, QPixmap, QIntValidator, QDoubleValidator
+from PyQt5.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QMessageBox, QPushButton, QVBoxLayout, \
+    QFormLayout, QLineEdit, QSpinBox, QWidget
 
 from handyview.utils import ROOT_DIR
 
@@ -134,3 +135,86 @@ class MessageDialog(QDialog):
 
     def setText(self, text):
         self.text_label.setText(text)
+
+
+# QLineEdit: https://blog.csdn.net/jia666666/article/details/81510502
+class CompareSettingEdit(QDialog):
+    def __init__(self, config) -> None:
+        super(CompareSettingEdit, self).__init__()
+        self.setWindowTitle("Compare setting")
+        self.setMinimumWidth(600)
+
+        self.config = config
+
+        num_view = self.config.get("num_view", 0)  # default view number is 0
+        zoom_factor = self.config.get("zoom_factor", 1.0)  # default zoom factor is 1.0
+        folder_paths = []
+        for idx in range(num_view):
+            folder_paths.append(self.config["view%d_folder" % idx])
+        self.num_view = num_view
+
+        self.num_view_line, self.zoom_factor_line = QSpinBox(), QLineEdit()
+        int_validator, double_validator = QIntValidator(self), QDoubleValidator(self)
+        # int_validator.setRange(1,4)
+        self.num_view_line.setRange(1,4)
+        double_validator.setRange(0,10)
+        double_validator.setDecimals(2)
+        # self.num_view_line.setValidator(int_validator)
+        self.zoom_factor_line.setValidator(double_validator)
+
+        for idx in range(num_view):
+            setattr(self, "view%d_folder_line"%idx, QLineEdit())
+
+        ### set init value
+        self.num_view_line.setValue(num_view)
+        for idx in range(num_view):
+            getattr(self, "view%d_folder_line"%idx).setText(folder_paths[idx])
+        self.zoom_factor_line.setText(str(zoom_factor))
+
+        ### set layout for visualize
+        self.flo = QFormLayout()
+        self.flo.addRow("Number of view", self.num_view_line)
+        for idx in range(num_view):
+            self.flo.addRow("view%d folder"%idx, getattr(self, "view%d_folder_line"%idx))
+        self.flo.addRow("zoom factor", self.zoom_factor_line)
+
+        ### add save/cancel button
+        self.save_button = QPushButton("Save")
+        self.cancel_button = QPushButton("Cancel")
+        bt_layout = QHBoxLayout()
+        bt_layout.addWidget(self.save_button)
+        bt_layout.addWidget(self.cancel_button)
+
+        box_layout = QVBoxLayout()
+        box_layout.addLayout(self.flo)  # addChildLayout is not working
+        box_layout.addLayout(bt_layout)
+        self.setLayout(box_layout)
+
+        ### dynamic change the num view
+        self.num_view_line.valueChanged.connect(self.adjustLayout)
+
+        self.cancel_button.clicked.connect(self.accept)
+
+    def adjustLayout(self):
+        """
+            adjust the number of folder path as num_view changes
+        """
+        num_view = self.num_view_line.value()
+        if num_view > self.num_view:
+            for idx in range(self.num_view, num_view):
+                folder_line = QLineEdit()
+                setattr(self, "view%d_folder_line"%idx, folder_line)
+                self.flo.insertRow(idx+1, "view%d folder"%idx, folder_line)
+        else:
+            for idx in range(self.num_view, num_view, -1):
+                # self.flo.takeRow(idx)  # this function has bug !
+                self.flo.removeRow(idx)
+        self.flo.update()
+        self.num_view = num_view
+
+    def exportConfig(self):
+        config = {"num_view": self.num_view}
+        for idx in range(self.num_view):
+            config["view%d_folder" % idx] = getattr(self, "view%d_folder_line"%idx).text()
+        config["zoom_factor"] = float(self.zoom_factor_line.text())
+        return config

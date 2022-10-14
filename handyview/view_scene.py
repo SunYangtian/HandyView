@@ -20,7 +20,7 @@ class HVView(QGraphicsView):
         super(HVView, self).__init__(scene, parent)
         self.parent = parent
         self.show_info = show_info
-        self.setDragMode(QGraphicsView.ScrollHandDrag)
+        # self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QGraphicsView.AnchorUnderMouse)
         self.setMouseTracking(True)
@@ -162,8 +162,12 @@ class HVView(QGraphicsView):
 
     def show_mouse_color(self, x_pos, y_pos):
         """Show mouse color with RGBA values."""
-        pixel = self.parent.qimg.pixel(int(x_pos), int(y_pos))
-        pixel_color = QColor(pixel)
+        if x_pos < 0 or x_pos >= self.parent.qimg.width() \
+            or y_pos < 0 or y_pos >= self.parent.qimg.height():
+            pixel_color = QColor()  # default 0,0,0
+        else:
+            pixel = self.parent.qimg.pixel(int(x_pos), int(y_pos))
+            pixel_color = QColor(pixel)
         self.parent.mouse_color_label.fill(pixel_color)
         rgba = pixel_color.getRgb()  # 8 bit RGBA
         self.parent.mouse_rgb_label.setText(f' ({rgba[0]:03d}, {rgba[1]:03d}, {rgba[2]:03d}, {rgba[3]:03d})')
@@ -246,8 +250,8 @@ class HVScene(QGraphicsScene):
         # Show mouse position and color when mouse move without button pressed
         if self.show_info:
             x_pos, y_pos = event.scenePos().x(), event.scenePos().y()
-            self.show_mouse_position(x_pos, y_pos)
-            self.show_mouse_color(x_pos, y_pos)
+            # self.show_mouse_position(x_pos, y_pos)
+            # self.show_mouse_color(x_pos, y_pos)
 
     def show_mouse_position(self, x_pos, y_pos):
         """Show mouse position under the scene position (ignore the zoom)."""

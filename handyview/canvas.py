@@ -334,8 +334,12 @@ class Canvas(QWidget):
         if init:
             if width < 500:
                 self.qviews[0].set_zoom(500 // width)
-            else:
+            elif self.num_view == 1:
                 self.qviews[0].set_zoom(1)
+            else:
+                ratio = min(2000 / (width * self.num_view), 1.0)
+                for qview in self.qviews:
+                    qview.set_zoom(ratio)
         for qview in self.qviews:
             qview.set_transform()
 

@@ -80,7 +80,8 @@ def exclude_file_name(parent):
 
 def compare(parent):
     """Compare."""
-    return new_action(parent, 'Compare', icon_name='compare.png', shortcut='F6', slot=parent.compare_folder)
+    # return new_action(parent, 'Compare', icon_name='compare.png', shortcut='F6', slot=parent.compare_folder)
+    return new_action(parent, 'Compare', icon_name='compare.png', shortcut='F6', slot=parent.compare_setting)
 
 
 def clear_compare(parent):
