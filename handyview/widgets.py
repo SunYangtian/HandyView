@@ -6,7 +6,7 @@ import os
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QFont, QIcon, QPixmap, QIntValidator, QDoubleValidator
 from PyQt5.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QMessageBox, QPushButton, QVBoxLayout, \
-    QFormLayout, QLineEdit, QSpinBox, QWidget
+    QFormLayout, QLineEdit, QSpinBox, QWidget, QGridLayout
 
 from handyview.utils import ROOT_DIR
 

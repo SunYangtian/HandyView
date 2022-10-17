@@ -307,8 +307,11 @@ class HVDB():
         setattr(self, "compare_config", config)
 
     def update_compare_config(self, config):
-        self.compare_config = config
-        print(config)
+        self.compare_config.update(config)
         self.update_com_folder(config)
+        self.save_config()
+
+    def save_config(self):
+        print(self.compare_config)
         with open(os.path.join(ROOT_DIR, 'history.json'), 'w') as jf:
-            json.dump(config, jf)
+            json.dump(self.compare_config, jf)

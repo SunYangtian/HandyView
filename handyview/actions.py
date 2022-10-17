@@ -145,3 +145,10 @@ def auto_zoom(parent):
 
 def auto_zoom_dialog(parent):
     return new_action(parent, 'Auto Zoom', icon_name='auto_zoom.png', slot=parent.auto_zoom_dialog)
+
+
+#  -------------------------------------
+# export video
+#  -------------------------------------
+def export_video(parent):
+    return new_action(parent, "Export Video", icon_name='video.png', slot=parent.export_video_dialog)

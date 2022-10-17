@@ -2,6 +2,9 @@ import os
 import re
 import sys
 from PIL import Image, ImageDraw
+import imageio.v2 as imageio
+import numpy as np
+import cv2
 
 FORMATS = ('.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG', '.ppm', '.PPM', '.bmp', '.BMP', '.gif', '.GIF', '.tiff',
            '.TIFF', '.webp', '.WEBP')
@@ -186,3 +189,44 @@ def crop_images(img_list,
             draw = ImageDraw.Draw(img_rect)
             draw.rectangle(((start_w, start_h), (start_w + len_w, start_h + len_h)), outline=color, width=line_width)
             img_rect.save(os.path.join(rect_folder, base_name + '_rect.png'))
+
+
+def export_video(img_path_list, video_path):
+    img_list = merge_img(img_path_list)  # merge images into one image
+    img2vid_core(img_list, video_path)
+
+
+def merge_img(img_path_list):
+    ### img_path_list: [[img1, img2], [imgg1, imgg2]]
+    num_view = len(img_path_list)
+    num_frames = [len(x) for x in img_path_list]
+    print("the frames number in each folder is:", num_frames)
+
+    # https://paulzhn.me/posts/python-zip.html  zip will use the shortest folder
+    img_list = [cat_img(*x) for x in zip(*img_path_list)]
+    return img_list
+
+
+def cat_img(*img_paths, axis=1):
+    ### default cat images in row direction
+    imgs = [imageio.imread(x)[...,:3] for x in img_paths]  # ignore alpha channel
+    return np.concatenate(imgs, axis=axis)
+
+
+def img2vid_core(images, output):
+    # Determine the width and height from the first image
+    frame = images[0]
+    height, width, channels = frame.shape
+
+    # Define the codec and create VideoWriter object
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v') # Be sure to use lower case
+    out = cv2.VideoWriter(output, fourcc, 15.0, (width, height))
+
+    for idx, image in enumerate(images):
+        print("processing the %d image ... " % idx)
+        frame = image
+        out.write(frame)
+
+    # Release everything if job is finished
+    out.release()
+    print("The output video is {}".format(output))

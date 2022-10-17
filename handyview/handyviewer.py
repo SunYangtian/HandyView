@@ -11,6 +11,7 @@ from handyview.canvas_crop import CanvasCrop
 from handyview.canvas_video import CanvasVideo
 from handyview.db import HVDB
 from handyview.utils import ROOT_DIR
+import handyview.utils as utils
 from handyview.widgets import HLine, MessageDialog, show_msg, CompareSettingEdit
 
 
@@ -152,6 +153,7 @@ class MainWindow(QMainWindow):
         # Help
         help_menu = menubar.addMenu('&Help(帮助)')
         help_menu.addAction(actions.show_instruction_msg(self))
+        help_menu.addAction(actions.export_video(self))
 
     def init_toolbar(self):
         self.toolbar = QToolBar('ToolBar', self)
@@ -471,6 +473,21 @@ class MainWindow(QMainWindow):
         if ok:
             self.center_canvas.canvas.target_zoom_width = int(target_zoom_width)
             self.center_canvas.canvas.show_image(init=False)
+
+    # ---------------------------------------
+    # slots: export video
+    # ---------------------------------------
+    def export_video_dialog(self):
+        img_path = self.center_canvas.canvas.img_path
+        tmp_video_path = str(os.path.dirname(img_path)) + ".mp4"
+        video_path = self.hvdb.compare_config.get("video_path", tmp_video_path)
+        target_path, ok = QInputDialog.getText(self, 'Export Video',
+        'Input the video saving path                          ',
+        QLineEdit.Normal, str(video_path))  # fill in space in label to increase width
+        if ok:
+            self.hvdb.compare_config["video_path"] = target_path
+            self.hvdb.save_config()
+            utils.export_video(self.hvdb.path_list, target_path)
 
 
 def create_new_window(init_path=None):

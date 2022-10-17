@@ -3,7 +3,7 @@ We use the Graphics View Framework (https://doc.qt.io/qt-5/graphicsview.html)
 for our HandyView.
 """
 from PyQt5 import QtCore
-from PyQt5.QtCore import QPoint, QRect, QSize
+from PyQt5.QtCore import QPoint, QRect, QSize, Qt
 from PyQt5.QtGui import QColor, QFont, QFontMetrics, QTransform
 from PyQt5.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QRubberBand
 
@@ -24,6 +24,7 @@ class HVView(QGraphicsView):
         self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QGraphicsView.AnchorUnderMouse)
         self.setMouseTracking(True)
+        self.setCursor(Qt.CrossCursor)
 
         self.zoom = 1
         self.rotate = 0
