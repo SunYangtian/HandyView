@@ -460,6 +460,9 @@ class MainWindow(QMainWindow):
             self.center_canvas.canvas.show_fingerprint = True
         self.center_canvas.canvas.show_image()
 
+    # def cal_metric(self):
+    #     self.center_canvas.canvas.show_image()
+
     # ---------------------------------------
     # slots: auto zoom
     # ---------------------------------------

@@ -209,7 +209,7 @@ def merge_img(img_path_list):
 
 def cat_img(*img_paths, axis=1):
     ### default cat images in row direction
-    imgs = [imageio.imread(x)[...,:3] for x in img_paths]  # ignore alpha channel
+    imgs = [imageio.imread(x)[...,[2,1,0]] for x in img_paths]  # ignore alpha channel, BGR
     return np.concatenate(imgs, axis=axis)
 
 
