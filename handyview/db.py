@@ -4,6 +4,8 @@ import imagehash
 import os
 from PIL import Image, ImageFile
 import json
+import handyview.utils as utils
+import imageio
 
 from handyview.utils import FORMATS, ROOT_DIR, get_img_list, scandir, sizeof_fmt
 from handyview.widgets import show_msg
@@ -39,6 +41,7 @@ class HVDB():
         self.file_size_list = [[]]
         self.md5_list = [[]]
         self.phash_list = [[]]
+        self.psnr_list = [[]]
 
         # for selection pos in crop canvas
         self.selection_pos = [0, 0, 0, 0]
@@ -72,6 +75,7 @@ class HVDB():
             self.file_size_list[0] = [None] * len(self.path_list[0])
             self.md5_list[0] = [None] * len(self.path_list[0])
             self.phash_list[0] = [None] * len(self.path_list[0])
+            self.psnr_list[0] = [None] * len(self.path_list[0])
             # get current pidx
             try:
                 self._pidx = self.path_list[0].index(self.init_path)
@@ -128,6 +132,7 @@ class HVDB():
         self.file_size_list.append([None] * len(paths))
         self.md5_list.append([None] * len(paths))
         self.phash_list.append([None] * len(paths))
+        self.psnr_list.append([None] * len(paths))
         # all the path list should have the same length
         self.is_same_len = True
         img_len_list = [len(self.path_list[0])]
@@ -143,6 +148,7 @@ class HVDB():
         self.file_size_list = [[None] * len(paths) for paths in self.path_list]
         self.md5_list = [[None] * len(paths) for paths in self.path_list]
         self.phash_list = [[None] * len(paths) for paths in self.path_list]
+        self.psnr_list = [[None] * len(paths) for paths in self.path_list]
 
     def update_path_list(self):
         if self.recursive_scan_folder is False:
@@ -152,6 +158,7 @@ class HVDB():
                 self.file_size_list[idx] = [None] * len(paths)
                 self.md5_list[idx] = [None] * len(paths)
                 self.phash_list[idx] = [None] * len(paths)
+                self.psnr_list[idx] = [None] * len(paths)
 
         # all the path list should have the same length
         self.is_same_len = True
@@ -226,6 +233,17 @@ class HVDB():
             phash = imagehash.phash(Image.open(path))
             self.phash_list[fidx][pidx] = phash
         return (md5, phash)
+
+    def get_metric(self, base_fidx, comp_fidx):
+        path, fidx, pidx = self.get_path(fidx=comp_fidx)
+        base_path, base_fidx, base_pidx = self.get_path(fidx=base_fidx)
+        # PSNR
+        psnr = self.psnr_list[fidx][pidx]
+        if psnr is None and base_path != path:
+            psnr = utils.cal_psnr(base_path, path)
+            self.psnr_list[fidx][pidx] = psnr
+        # Others to be supplemented
+        return {"PSNR": psnr}
 
     def get_folder_len(self):
         return len(self.folder_list)

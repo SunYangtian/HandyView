@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import (QApplication, QDockWidget, QFileDialog, QGridLayout
 
 import handyview.actions as actions
 from handyview.canvas import Canvas
+from handyview.mag_canvas import MagCanvas
 from handyview.canvas_crop import CanvasCrop
 from handyview.canvas_video import CanvasVideo
 from handyview.db import HVDB
@@ -180,11 +181,12 @@ class MainWindow(QMainWindow):
         self.toolbar.addSeparator()
         self.toolbar.addAction(actions.switch_main_canvas(self))
         self.toolbar.addAction(actions.switch_compare_canvas(self))
-        self.toolbar.addAction(actions.switch_preview_canvas(self))
+        self.toolbar.addAction(actions.switch_magnification_canvas(self))
 
         # others
         self.toolbar.addSeparator()
-        self.toolbar.addAction(actions.set_fingerprint(self))
+        # self.toolbar.addAction(actions.set_fingerprint(self))
+        self.toolbar.addAction(actions.cal_metric(self))
 
         # help
         self.toolbar.addSeparator()
@@ -429,6 +431,12 @@ class MainWindow(QMainWindow):
     def switch_preview_canvas(self):
         show_msg('Information', '^_^', text=('Has not implemented yet.\nContributions are welcome!\n尚未实现, 欢迎贡献!'))
 
+    def switch_magnification_canvas(self):
+        self.dock_info.close()
+        self.center_canvas.canvas = MagCanvas(self, self.hvdb)
+        self.setCentralWidget(self.center_canvas.canvas)
+        self.canvas_type = 'magnification'
+
     # ---------------------------------------
     # slots: canvas tabs
     # ---------------------------------------
@@ -460,8 +468,12 @@ class MainWindow(QMainWindow):
             self.center_canvas.canvas.show_fingerprint = True
         self.center_canvas.canvas.show_image()
 
-    # def cal_metric(self):
-    #     self.center_canvas.canvas.show_image()
+    def cal_metric(self):
+        if self.center_canvas.canvas.show_metric:
+            self.center_canvas.canvas.show_metric = False
+        else:
+            self.center_canvas.canvas.show_metric = True
+        self.center_canvas.canvas.show_image()
 
     # ---------------------------------------
     # slots: auto zoom

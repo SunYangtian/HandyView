@@ -9,7 +9,9 @@
             "type": "python",
             "request": "launch",
             "module": "handyview.handyviewer",
-            "args": ["D:\\NRBillboard2\\Data\\ZTree6\\AO.png"]
+            "args": ["D:\\NRBillboard2\\Data\\ZTree3_Eval45_HDR\\imgs\\ScreenShot_00050.png"]
         }
     ]
 }
+
+// "args": ["D:\\NRBillboard2\\Data\\ZTree6\\AO.png"]

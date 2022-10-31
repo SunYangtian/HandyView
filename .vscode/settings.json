@@ -14,7 +14,7 @@
     ],
     "python.linting.flake8Enabled": true,
     "python.linting.flake8Args": [
-        "max-line-length=120"
+        "max-line-length=120", "--ignore=E403"
     ],
-    "python.pythonPath": "G:\\Miniconda3\\python.exe",
+    "python.defaultInterpreterPath": "G:\\Miniconda3\\python.exe",
 }

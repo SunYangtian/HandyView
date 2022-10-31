@@ -20,6 +20,7 @@ class Canvas(QWidget):
         self.init_widgets_layout()
         self.qview_bg_color = 'white'
         self.show_fingerprint = False
+        self.show_metric = False
 
         # set bg color to light_gray when num_view > 1
         if self.num_view > 1:
@@ -229,6 +230,8 @@ class Canvas(QWidget):
                 if self.show_fingerprint:
                     md5, phash = self.db.get_fingerprint(pidx=pidx)
                     md5_0, phash_0 = self.db.get_fingerprint(pidx=self.db.pidx)
+                if self.show_metric:
+                    show_msg('Critical', 'Error!', "Metric cannot be calculated in interval mode!")
             else:
                 fidx = self.db.fidx + idx
                 img_path = self.db.get_path(fidx=fidx)[0]
@@ -238,6 +241,8 @@ class Canvas(QWidget):
                 if self.show_fingerprint:
                     md5, phash = self.db.get_fingerprint(fidx=fidx)
                     md5_0, phash_0 = self.db.get_fingerprint(fidx=self.db.fidx)
+                if self.show_metric:
+                    metric = self.db.get_metric(base_fidx=self.db.fidx, comp_fidx=fidx)
 
             qimg = QImage(img_path)
             self.img_path = img_path
@@ -285,6 +290,9 @@ class Canvas(QWidget):
                 else:
                     shown_text.append(f'md5: {md5}')
                     shown_text.append(f'phash: {phash}')
+            if self.show_metric:
+                for k, v in metric.items():
+                    shown_text.append(f'{k}: {v}')
 
             if qview.hasFocus():
                 color = 'red'

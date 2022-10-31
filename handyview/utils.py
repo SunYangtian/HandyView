@@ -5,6 +5,7 @@ from PIL import Image, ImageDraw
 import imageio.v2 as imageio
 import numpy as np
 import cv2
+from skimage.metrics import peak_signal_noise_ratio
 
 FORMATS = ('.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG', '.ppm', '.PPM', '.bmp', '.BMP', '.gif', '.GIF', '.tiff',
            '.TIFF', '.webp', '.WEBP')
@@ -191,10 +192,11 @@ def crop_images(img_list,
             img_rect.save(os.path.join(rect_folder, base_name + '_rect.png'))
 
 
+# ---------------------------- Video Export ----------------------------------------
+
 def export_video(img_path_list, video_path):
     img_list = merge_img(img_path_list)  # merge images into one image
     img2vid_core(img_list, video_path)
-
 
 def merge_img(img_path_list):
     ### img_path_list: [[img1, img2], [imgg1, imgg2]]
@@ -206,12 +208,10 @@ def merge_img(img_path_list):
     img_list = [cat_img(*x) for x in zip(*img_path_list)]
     return img_list
 
-
 def cat_img(*img_paths, axis=1):
     ### default cat images in row direction
     imgs = [imageio.imread(x)[...,[2,1,0]] for x in img_paths]  # ignore alpha channel, BGR
     return np.concatenate(imgs, axis=axis)
-
 
 def img2vid_core(images, output):
     # Determine the width and height from the first image
@@ -230,3 +230,37 @@ def img2vid_core(images, output):
     # Release everything if job is finished
     out.release()
     print("The output video is {}".format(output))
+# ----------------------------------------------------------------------------------
+
+# ---------------------------- Metric Calculation ----------------------------------------
+
+def cal_psnr(orig_img_path, recon_img_path):
+    fn = lambda x: cv2.imread(x) / 255.
+    orig_img, recon_img = map(fn, [orig_img_path, recon_img_path])
+    psnr = peak_signal_noise_ratio(orig_img, recon_img)
+    return psnr
+
+
+# ---------------------------- For image magnification -----------------------------------
+def draw_line(img, pt1, pt2, color, thickness=1, style='dotted', gap=10):
+    """More general routine, compared to opencv's line, to draw a line in an image."""
+    if style == 'original':
+        cv2.line(img, pt1, pt2, color=color, thickness=thickness)
+        return
+    distance = ((pt1[0] - pt2[0]) ** 2 + (pt1[1] - pt2[1]) ** 2) ** 0.5
+    points = []
+    for i in np.arange(0, distance, gap):
+        r = i / distance
+        x = int((pt1[0] * (1 - r) + pt2[0] * r) + .5)
+        y = int((pt1[1] * (1 - r) + pt2[1] * r) + .5)
+        point = x, y
+        points.append(point)
+    if style == 'dotted':
+        for point in points:
+            cv2.circle(img, point, radius=thickness, color=color, thickness=-1)
+    elif style == 'rectangled':
+        for i, (start_point, end_point) in enumerate(zip(points[:-1], points[1:])):
+            if i % 2:
+                cv2.line(img, start_point, end_point, color=color, thickness=thickness)
+    else:
+        raise ValueError(f'Unknown style {style}. Please choose one of: original, dotted, or rectangled.')

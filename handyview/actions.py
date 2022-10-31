@@ -105,6 +105,9 @@ def switch_compare_canvas(parent):
 def switch_preview_canvas(parent):
     return new_action(parent, 'Preview', icon_name='preview_canvas.png', slot=parent.switch_preview_canvas)
 
+def switch_magnification_canvas(parent):
+    return new_action(parent, 'Magnification', icon_name='preview_canvas.png', slot=parent.switch_magnification_canvas)
+
 
 # ---------------------------------------
 # canvas tabs
@@ -134,6 +137,9 @@ def show_instruction_msg(parent):
 
 def set_fingerprint(parent):
     return new_action(parent, 'Fingerprint', icon_name='fingerprint.png', slot=parent.set_fingerprint)
+
+def cal_metric(parent):
+    return new_action(parent, 'Metric', icon_name='fingerprint.png', slot=parent.cal_metric)
 
 
 # ---------------------------------------
